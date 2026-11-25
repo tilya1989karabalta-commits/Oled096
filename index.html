@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Төлөм Колонкасы Панели</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #1a1e29;
+            --panel-bg: #222836;
+            --text-color: #ffffff;
+            --text-muted: #8b9bb4;
+            --green-active: #2ecc71;
+            --green-hover: #27ae60;
+            --border-color: #334155;
+            --yellow-display: #f1c40f;
+            --blue-display: #3498db;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .lang-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .lang-btn {
+            padding: 12px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        /* Активдүү баскычтын стили (Жашыл) */
+        .lang-btn.active {
+            background-color: var(--green-active);
+            border-color: var(--green-active);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .qr-container p {
+            color: #333;
+            margin: 10px 0 0 0;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 20px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .quick-btn {
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .quick-btn:hover {
+            background-color: #2c3a4f;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--green-active);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn:hover {
+            background-color: var(--green-hover);
+        }
+
+        .display-screen {
+            background-color: #000;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .display-header {
+            background-color: var(--yellow-display);
+            color: #000;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        .display-body {
+            padding: 20px 10px;
+            text-align: center;
+        }
+        .display-amount {
+            color: var(--blue-display);
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .display-status {
+            color: var(--blue-display);
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1 id="mainTitle">🔊 ТӨЛӨМ КОЛОНКАСЫ ПАНЕЛИ</h1>
+        <p>ESP32-S3 · KY / RU</p>
+    </div>
+
+    <!-- Тил тандоо баскычтары (Бири Кыргызча, бири Орусча болуп турат) -->
+    <div class="lang-grid" style="margin-bottom: 20px;">
+        <button class="lang-btn" id="btnPanel">ПАНЕЛЬ</button>
+        <button class="lang-btn" id="btnSettings">ЖӨНДӨӨ</button>
+        <button class="lang-btn active" id="btnKy" onclick="changeLanguage('ky')">Кыргызча</button>
+        <button class="lang-btn" id="btnRu" onclick="changeLanguage('ru')">Русский</button>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title" id="title1">1. СУММА ЖАНА QR-КОД</div>
+        
+        <div class="qr-container">
+            <div id="qrcode"></div>
+            <p id="qrText">Төлөө үчүн сканерлеңиз</p>
+        </div>
+
+        <input type="number" id="amountInput" class="amount-input" value="500" min="1">
+        
+        <div class="quick-amounts">
+            <button class="quick-btn" onclick="setAmount(100)">100</button>
+            <button class="quick-btn" onclick="setAmount(500)">500</button>
+            <button class="quick-btn" onclick="setAmount(1000)">1000</button>
+            <button class="quick-btn" onclick="setAmount(5000)">5000</button>
+        </div>
+
+        <button class="action-btn" id="sendBtn" onclick="sendPayment()">Төлөм келди → колонкага жөнөтүү</button>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title" id="title2">2. КОЛОНКАДА ЭМНЕ ЧЫГАТ</div>
+        <div class="display-screen">
+            <div class="display-header" id="screenHeader">Төлөм келди</div>
+            <div class="display-body">
+                <div class="display-amount" id="screenAmount">500 сом</div>
+                <div class="display-status" id="screenStatus">ТҮШТҮ</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. КОТОРМОЛОРДУН СӨЗДҮГҮ ---
+    const translations = {
+        ky: {
+            mainTitle: "🔊 ТӨЛӨМ КОЛОНКАСЫ ПАНЕЛИ",
+            panel: "ПАНЕЛЬ",
+            settings: "ЖӨНДӨӨ",
+            title1: "1. СУММА ЖАНА QR-КОД",
+            qrText: "Төлөө үчүн сканерлеңиз",
+            sendBtn: "Төлөм келди → колонкага жөнөтүү",
+            title2: "2. КОЛОНКАДА ЭМНЕ ЧЫГАТ",
+            screenHeader: "Төлөм келди",
+            screenStatus: "ТҮШТҮ",
+            currency: "сом",
+            alertError: "Сураныч, туура сумманы киргизиңиз!",
+            btnSent: "ЖӨНӨТҮЛДҮ!"
+        },
+        ru: {
+            mainTitle: "🔊 ПАНЕЛЬ КОЛОНКИ ОПЛАТЫ",
+            panel: "ПАНЕЛЬ",
+            settings: "НАСТРОЙКА",
+            title1: "1. СУММА И QR-КОД",
+            qrText: "Отсканируйте для оплаты",
+            sendBtn: "Оплата поступила → отправить на колонку",
+            title2: "2. ЧТО ВЫВОДИТСЯ НА КОЛОНКЕ",
+            screenHeader: "Оплата поступила",
+            screenStatus: "ПОСТУПИЛО",
+            currency: "сом",
+            alertError: "Пожалуйста, введите правильную сумму!",
+            btnSent: "ОТПРАВЛЕНО!"
+        }
+    };
+
+    let currentLang = 'ky'; // Демейки тил
+
+    // --- 2. ТИЛДИ АЛМАШТЫРУУ ФУНКЦИЯСЫ ---
+    function changeLanguage(lang) {
+        currentLang = lang;
+        
+        // 1. Тил баскычтарынын түсүн (активдүү) өзгөртүү
+        document.getElementById('btnKy').classList.remove('active');
+        document.getElementById('btnRu').classList.remove('active');
+        
+        if (lang === 'ky') {
+            document.getElementById('btnKy').classList.add('active');
+        } else {
+            document.getElementById('btnRu').classList.add('active');
+        }
+
+        // 2. Бардык тексттерди сөздүктөн алып алмаштыруу
+        const t = translations[lang];
+        
+        document.getElementById('mainTitle').innerText = t.mainTitle;
+        document.getElementById('btnPanel').innerText = t.panel;
+        document.getElementById('btnSettings').innerText = t.settings;
+        document.getElementById('title1').innerText = t.title1;
+        document.getElementById('qrText').innerText = t.qrText;
+        document.getElementById('sendBtn').innerText = t.sendBtn;
+        document.getElementById('title2').innerText = t.title2;
+        document.getElementById('screenHeader').innerText = t.screenHeader;
+        document.getElementById('screenStatus').innerText = t.screenStatus;
+
+        // 3. Экрандагы сумманын артындагы "сом" дегенди да жаңыртуу
+        let currentAmount = document.getElementById('amountInput').value;
+        document.getElementById('screenAmount').innerText = currentAmount + " " + t.currency;
+    }
+
+    // --- 3. QR-КОД ЖАНА СУММА ЛОГИКАСЫ ---
+    let paymentLink = "https://sizin-bank-shiltemengiz.kg/pay?amount="; 
+    
+    function generateQR(amount) {
+        document.getElementById("qrcode").innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), {
+            text: paymentLink + amount,
+            width: 150,
+            height: 150,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }
+
+    // Алгачкы QR кодду жаратуу (500 сом менен)
+    generateQR(500);
+
+    function setAmount(value) {
+        document.getElementById('amountInput').value = value;
+        generateQR(value);
+    }
+
+    function sendPayment() {
+        let amount = document.getElementById('amountInput').value;
+        let t = translations[currentLang]; // Учурдагы тилдеги сөздөрдү алуу
+        
+        if (!amount || amount <= 0) {
+            alert(t.alertError);
+            return;
+        }
+
+        document.getElementById('screenAmount').innerText = amount + " " + t.currency;
+
+        let btn = document.getElementById('sendBtn');
+        let originalText = btn.innerText;
+        
+        btn.innerText = t.btnSent;
+        btn.style.backgroundColor = "#27ae60";
+        
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.backgroundColor = "";
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
